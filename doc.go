@@ -1,6 +1,6 @@
-// CouchAccess project doc.go
+// couchaccess project doc.go
 
 /*
-CouchAccess document
+couchaccess document
 */
-package CouchAccess
+package couchaccess

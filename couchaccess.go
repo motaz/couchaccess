@@ -1,5 +1,5 @@
-// CouchAccess project CouchAccess.go
-package CouchAccess
+// CouchAccess project couchaccess.go
+package couchaccess
 
 import (
 	"encoding/json"
@@ -60,12 +60,16 @@ func Update(db *Couchdatabase, theDoc interface{}, id string, rev string) {
 
 }
 
-func Search(db *Couchdatabase, selector string, result interface{}) (err error) {
+func Search(db *Couchdatabase, selector string, sort interface{}, result interface{}) (err error) {
 
 	var selectorObj interface{}
 	err = json.Unmarshal([]byte(selector), &selectorObj)
 	params := couchdb.FindQueryParams{Selector: &selectorObj}
+	if sort != "" {
 
+		params.Sort = sort
+
+	}
 	err = db.connection.Find(&result, &params)
 	if err != nil {
 		println("Error in .Find: ", err.Error())
