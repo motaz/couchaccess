@@ -4,7 +4,9 @@ package couchaccess
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -13,11 +15,20 @@ import (
 
 type Couchdatabase struct {
 	connection *couchdb.Database
+	server     string
+	username   string
+	database   string
+	password   string
 }
 
 func ConnectToDB(server, username, password, database string) (db *Couchdatabase, err error) {
 
 	db = new(Couchdatabase)
+	db.server = server
+	db.username = username
+	db.password = password
+	db.database = database
+
 	var timeout = time.Duration(500 * time.Millisecond)
 	conn, err := couchdb.NewConnection(server, 5984, timeout)
 	if err != nil {
@@ -85,4 +96,29 @@ func GetNewID() string {
 	randID := time.Now().Format("06102150405") + "-" + randPart
 	return randID
 
+}
+
+// CallView
+func CallView(db *Couchdatabase, designname string, viewname string, params string) (result []byte) {
+
+	timeout := time.Duration(30 * time.Second)
+	client := http.Client{
+		Timeout: timeout,
+	}
+
+	aurl := "http://" + db.server + ":5984/" + db.database + "/_design/" +
+		designname + "/_view/" + viewname
+	if params != "" {
+		aurl += "?" + params
+	}
+
+	response, err := client.Get(aurl)
+	if err != nil {
+		fmt.Println("The HTTP request failed with error :" + err.Error())
+	} else {
+
+		result, _ = ioutil.ReadAll(response.Body)
+
+	}
+	return
 }
