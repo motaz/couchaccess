@@ -1,4 +1,8 @@
+//
 // CouchAccess project couchaccess.go
+// https://github.com/motaz/couchaccess
+// Developed by Motaz, Code 2019
+//
 package couchaccess
 
 import (
