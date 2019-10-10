@@ -25,6 +25,11 @@ type Couchdatabase struct {
 	password   string
 }
 
+func (adata *Couchdatabase) GetConnection() *couchdb.Database {
+
+	return adata.connection
+}
+
 func ConnectToDB(server, username, password, database string) (db *Couchdatabase, err error) {
 
 	db = new(Couchdatabase)
