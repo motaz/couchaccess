@@ -6,12 +6,15 @@
 package couchaccess
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rhinoman/couchdb-go"
@@ -56,12 +59,12 @@ func ConnectToDB(server, username, password, database string) (db *Couchdatabase
 	return
 }
 
-func Insert(db *Couchdatabase, theDoc interface{}, id string) (rev string, err error) {
+func Insert(db *Couchdatabase, theDoc interface{}, id string) (rev string, insertedID string, err error) {
 
 	if id == "" {
 		id = GetNewID()
 	}
-
+	insertedID = id
 	rev, err = db.connection.Save(theDoc, id, "")
 
 	return
@@ -78,6 +81,25 @@ func Update(db *Couchdatabase, theDoc interface{}, id string, rev string) {
 		println("Updated: ", rev)
 	}
 
+}
+
+func UploadAttachment(db *Couchdatabase, filename string, id string, rev string) (arev string, err error) {
+
+	afile, err := os.Open(filename)
+	filer := bufio.NewReader(afile)
+	idx := strings.LastIndex(filename, ".")
+	aext := ""
+	if idx > 0 {
+		aext = filename[idx:]
+	}
+	var sep string
+	sep = string(os.PathSeparator)
+	if strings.Contains(filename, sep) {
+		filename = filename[strings.LastIndex(filename, sep)+1:]
+		println(filename)
+	}
+	arev, err = db.connection.SaveAttachment(id, rev, filename, aext, filer)
+	return
 }
 
 func Search(db *Couchdatabase, selector string, sort interface{}, result interface{}) (err error) {
