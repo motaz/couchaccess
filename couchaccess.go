@@ -83,22 +83,30 @@ func Update(db *Couchdatabase, theDoc interface{}, id string, rev string) {
 
 }
 
-func UploadAttachment(db *Couchdatabase, filename string, id string, rev string) (arev string, err error) {
+func GetOnlyName(filename string) string {
 
-	afile, err := os.Open(filename)
-	filer := bufio.NewReader(afile)
+	sep := string(os.PathSeparator)
+	println(strings.Count(filename, sep))
+	if strings.Count(filename, sep) > 1 {
+		filename = filename[strings.LastIndex(filename, sep)+1:]
+		println(filename)
+	}
+	return filename
+}
+
+func UploadAttachment(db *Couchdatabase, filename string, fileContents *bufio.Reader, id string, rev string) (arev string, err error) {
+	sep := string(os.PathSeparator)
+
 	idx := strings.LastIndex(filename, ".")
 	aext := ""
 	if idx > 0 {
 		aext = filename[idx:]
 	}
-	var sep string
-	sep = string(os.PathSeparator)
 	if strings.Contains(filename, sep) {
 		filename = filename[strings.LastIndex(filename, sep)+1:]
-		println(filename)
+
 	}
-	arev, err = db.connection.SaveAttachment(id, rev, filename, aext, filer)
+	arev, err = db.connection.SaveAttachment(id, rev, "file", aext, fileContents)
 	return
 }
 
