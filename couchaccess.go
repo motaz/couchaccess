@@ -95,6 +95,7 @@ func GetOnlyName(filename string) string {
 }
 
 func UploadAttachment(db *Couchdatabase, filename string, fileContents *bufio.Reader, id string, rev string) (arev string, err error) {
+
 	sep := string(os.PathSeparator)
 
 	idx := strings.LastIndex(filename, ".")
@@ -106,7 +107,7 @@ func UploadAttachment(db *Couchdatabase, filename string, fileContents *bufio.Re
 		filename = filename[strings.LastIndex(filename, sep)+1:]
 
 	}
-	arev, err = db.connection.SaveAttachment(id, rev, "file", aext, fileContents)
+	arev, err = db.connection.SaveAttachment(id, rev, filename, aext, fileContents)
 	return
 }
 
