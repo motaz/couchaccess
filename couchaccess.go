@@ -71,15 +71,11 @@ func Insert(db *Couchdatabase, theDoc interface{}, id string) (rev string, inser
 
 }
 
-func Update(db *Couchdatabase, theDoc interface{}, id string, rev string) {
+func Update(db *Couchdatabase, theDoc interface{}, id string, rev string) (newrev, err error) {
 
-	rev, err := db.connection.Save(theDoc, id, rev)
+	newrev, err := db.connection.Save(theDoc, id, rev)
 
-	if err != nil {
-		println("Error in .Save: ", err.Error())
-	} else {
-		println("Updated: ", rev)
-	}
+	return
 
 }
 
