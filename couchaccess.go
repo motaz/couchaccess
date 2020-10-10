@@ -71,9 +71,9 @@ func Insert(db *Couchdatabase, theDoc interface{}, id string) (rev string, inser
 
 }
 
-func Update(db *Couchdatabase, theDoc interface{}, id string, rev string) (newrev, err error) {
+func Update(db *Couchdatabase, theDoc interface{}, id string, rev string) (newrev string, err error) {
 
-	newrev, err := db.connection.Save(theDoc, id, rev)
+	newrev, err = db.connection.Save(theDoc, id, rev)
 
 	return
 
