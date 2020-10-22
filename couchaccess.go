@@ -7,6 +7,7 @@ package couchaccess
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -134,27 +135,70 @@ func GetNewID() string {
 
 }
 
-// CallView
-func CallView(db *Couchdatabase, designname string, viewname string, params string) (result []byte) {
+type userAuth struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+func Authenticate(db *Couchdatabase) (success bool, err error, result string) {
 
 	timeout := time.Duration(30 * time.Second)
 	client := http.Client{
 		Timeout: timeout,
 	}
+	aurl := "http://" + db.server + ":5984/_session"
 
-	aurl := "http://" + db.server + ":5984/" + db.database + "/_design/" +
-		designname + "/_view/" + viewname
-	if params != "" {
-		aurl += "?" + params
-	}
+	var auth userAuth
+	auth.Name = db.username
+	auth.Password = db.password
 
-	response, err := client.Get(aurl)
+	jsonValue, _ := json.Marshal(auth)
+	response, err := client.Post(aurl, "application/json", bytes.NewBuffer(jsonValue))
 	if err != nil {
+		success = false
 		fmt.Println("The HTTP request failed with error :" + err.Error())
 	} else {
 
-		result, _ = ioutil.ReadAll(response.Body)
+		//resultBytes, _ := ioutil.ReadAll(response.Body)
+		cookie := response.Header.Get("Set-Cookie")
+		result = cookie[:strings.Index(cookie, ";")]
 
+		success = true
+
+	}
+	return
+}
+
+// CallView
+func CallView(db *Couchdatabase, designname string,
+	viewname string, params string) (result []byte, err error) {
+	var success bool
+	var cookie string
+	success, err, cookie = Authenticate(db)
+	if success {
+		timeout := time.Duration(30 * time.Second)
+		client := http.Client{
+			Timeout: timeout,
+		}
+
+		aurl := "http://" + db.server + ":5984/" + db.database + "/_design/" +
+			designname + "/_view/" + viewname
+		if params != "" {
+			aurl += "?" + params
+		}
+		req, err := http.NewRequest("GET", aurl, nil)
+
+		//response, err := client.Get(aurl)
+		req.Header.Add("Cookie", cookie)
+
+		response, err := client.Do(req)
+		if err != nil {
+			fmt.Println("The HTTP request failed with error :" + err.Error())
+		} else {
+
+			result, _ = ioutil.ReadAll(response.Body)
+
+		}
 	}
 	return
 }
