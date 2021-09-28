@@ -2,7 +2,8 @@
 // CouchAccess project couchaccess.go
 // https://github.com/motaz/couchaccess
 // Developed by Motaz, Code 2019
-//
+// Updated 28 Sept 2021
+
 package couchaccess
 
 import (
@@ -42,7 +43,7 @@ func ConnectToDB(server, username, password, database string) (db *Couchdatabase
 	db.password = password
 	db.database = database
 
-	var timeout = time.Duration(500 * time.Millisecond)
+	var timeout = time.Duration(time.Second * 10)
 	conn, err := couchdb.NewConnection(server, 5984, timeout)
 	if err != nil {
 		println("Error: ", err.Error())
